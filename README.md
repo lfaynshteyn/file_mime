@@ -1,4 +1,4 @@
-#image_mime
+# image_mime
 
 This is a small header only library that can be used to determine the mime type of an image based on both the file extension and the file content using magic numbers.
 
@@ -17,6 +17,9 @@ One thing to note, is that some formats allow for 'gaps' in their magic number b
 ## Usage
 
 ```cpp
+
+#include "image_mime/image_mime.h"
+
 auto mime_type = std::string{};
 
 // Get the mime type based on the file extension alone
