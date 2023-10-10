@@ -1,5 +1,4 @@
-# C++17 support was intorduced in CMake v3.12
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.23)
 
 # Make URL download use the new CMP0135 policy: https://cmake.org/cmake/help/latest/policy/CMP0135.html
 cmake_policy(SET CMP0135 NEW)
@@ -7,12 +6,12 @@ cmake_policy(SET CMP0135 NEW)
 #cmake_policy(SET CMP0048 NEW)
 
 # Only use C++ in this project
-project(image_mime VERSION 1.0.0 LANGUAGES CXX)
+project(file_mime VERSION 2.0.0 LANGUAGES CXX)
 
 # Include the path to the header folder
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-# Include Google Test & Benchamrk libraries
+# Include Google Test & Benchmark libraries
 include(FetchContent)
 
 FetchContent_Declare(
@@ -35,16 +34,25 @@ FetchContent_MakeAvailable(
 )
 
 # The main unit test executable
-add_executable(image_mime_test ${PROJECT_SOURCE_DIR}/test/image_mime_test.cpp)
+add_executable(file_mime_test ${PROJECT_SOURCE_DIR}/test/file_mime_test.cpp)
+target_sources(file_mime_test
+	PUBLIC
+	${PROJECT_SOURCE_DIR}/test/file_mime_test.cpp
+	PUBLIC FILE_SET HEADERS
+	BASE_DIRS ${PROJECT_SOURCE_DIR}/include
+	FILES
+		${PROJECT_SOURCE_DIR}/include/file_mime/file_mime.h
+)
+set_property(DIRECTORY ${PROJECT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT file_mime_test)
 
 # Link against Google Test & Benchmark
-target_link_libraries(image_mime_test gtest benchmark::benchmark)
+target_link_libraries(file_mime_test gtest benchmark::benchmark)
 
 # Preprocesor definitions to select the 'deep' mime type checking algorithm and set the version
-target_compile_definitions(image_mime_test PRIVATE GET_MIME_TYPE_DEEP_V2 IMAGE_MIME_VERSION="${PROJECT_VERSION}")
+target_compile_definitions(file_mime_test PRIVATE GET_MIME_TYPE_DEEP_V2 FILE_MIME_VERSION="${PROJECT_VERSION}")
 
 # Restrict the C++ version to 17 and above
-set_property(TARGET image_mime_test PROPERTY CXX_STANDARD 17)
-set_property(TARGET image_mime_test PROPERTY CXX_STANDARD_REQUIRED On)
-set_property(TARGET image_mime_test PROPERTY CXX_EXTENSIONS Off)
+set_property(TARGET file_mime_test PROPERTY CXX_STANDARD 17)
+set_property(TARGET file_mime_test PROPERTY CXX_STANDARD_REQUIRED On)
+set_property(TARGET file_mime_test PROPERTY CXX_EXTENSIONS Off)
 
