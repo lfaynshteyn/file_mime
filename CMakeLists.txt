@@ -6,7 +6,7 @@ cmake_policy(SET CMP0135 NEW)
 #cmake_policy(SET CMP0048 NEW)
 
 # Only use C++ in this project
-project(file_mime VERSION 2.0.0 LANGUAGES CXX)
+project(file_mime VERSION 2.1.0 LANGUAGES CXX)
 
 # Include the path to the header folder
 include_directories(${PROJECT_SOURCE_DIR}/include)

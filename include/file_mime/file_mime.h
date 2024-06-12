@@ -47,7 +47,10 @@ namespace file_mime {
 	inline const auto pm_bytes = std::vector<std::uint8_t>{ 0x56, 0x49, 0x45, 0x57 };
 	inline const auto jpg_bytes_1 = std::vector<std::uint8_t>{ 0xFF, 0xD8, 0xFF, 0xE0 };
 	inline const auto jpg_bytes_2 = std::vector<std::uint8_t>{ 0xFF, 0xD8, 0xFF, 0xE1 };
-	inline const auto jpg_bytes_3 = std::vector<std::uint8_t>{ 0xFF, 0xD8, 0xFF, 0xDB };
+	inline const auto jpg_bytes_3 = std::vector<std::uint8_t>{ 0xFF, 0xD8, 0xFF, 0xE2 }; // Canon
+	inline const auto jpg_bytes_4 = std::vector<std::uint8_t>{ 0xFF, 0xD8, 0xFF, 0xE3 }; // Samsung
+	inline const auto jpg_bytes_5 = std::vector<std::uint8_t>{ 0xFF, 0xD8, 0xFF, 0xE8 }; // SPIFF (Still Picture Interchange File Format)
+	inline const auto jpg_bytes_6 = std::vector<std::uint8_t>{ 0xFF, 0xD8, 0xFF, 0xDB };
 	inline const auto jpg_2000_bytes = std::vector<std::uint8_t>{ 0x00, 0x00, 0x00, 0x0C, 0x6A, 0x50, 0x20, 0x20, 0x0D, 0x0A, 0x87, 0x0A }; // JPEG-2000
 	inline const auto tiff_bytes_mono = std::vector<std::uint8_t>{ 0x0C, 0xED };
 	inline const auto tiff_bytes_intel = std::vector<std::uint8_t>{ 0x49, 0x49, 0x2A, 0x00 };
@@ -173,7 +176,7 @@ namespace file_mime {
 
 		// Approach 0: linearly searching through all magic numbers and trying to match them with the file bytes
 		template <>
-		[[nodiscard]] inline auto get_type_deep<deep_alg_version::DEEP_ALG_V0>(const uint8_t* file_bytes, const std::size_t file_size, const std::string& mime_type_hint) -> std::string {
+		[[nodiscard]] inline auto get_type_deep<deep_alg_version::DEEP_ALG_V0>(const uint8_t* file_bytes, const std::size_t file_size, [[maybe_unused]] const std::string& mime_type_hint) -> std::string {
 
 			// An unordered map of the mime types and their corresponding magic numbers.
 			static auto mime_to_magic = std::vector<std::pair<std::string, std::vector<uint8_t>>>{
@@ -190,6 +193,10 @@ namespace file_mime {
 				{ "image/jpeg", jpg_bytes_1 },
 				{ "image/jpeg", jpg_bytes_2 },
 				{ "image/jpeg", jpg_bytes_3 },
+				{ "image/jpeg", jpg_bytes_4 },
+				{ "image/jpeg", jpg_bytes_5 },
+				{ "image/jpeg", jpg_bytes_6 },
+
 				{ "image/jp2", jpg_2000_bytes },
 
 				{ "image/tiff", tiff_bytes_mono},
@@ -239,7 +246,7 @@ namespace file_mime {
 
 				{ "image/pm", {pm_bytes} },
 
-				{ "image/jpeg", {jpg_bytes_1, jpg_bytes_2, jpg_bytes_3} },
+				{ "image/jpeg", {jpg_bytes_1, jpg_bytes_2, jpg_bytes_3, jpg_bytes_4, jpg_bytes_5, jpg_bytes_6} },
 
 				{ "image/jp2", { jpg_2000_bytes} },
 
@@ -290,7 +297,7 @@ namespace file_mime {
 
 		// Approach 2: use a vector of pairs of mime types and their corresponding magic numbers, sort it lexicographically once, and then perform binary search using std::lower_bound.
 		template<>
-		[[nodiscard]] inline auto get_type_deep<deep_alg_version::DEEP_ALG_V2>(const uint8_t* file_bytes, const std::size_t file_size, const std::string& mime_type_hint) -> std::string {
+		[[nodiscard]] inline auto get_type_deep<deep_alg_version::DEEP_ALG_V2>(const uint8_t* file_bytes, const std::size_t file_size, [[maybe_unused]] const std::string& mime_type_hint) -> std::string {
 
 			// An unordered map of the mime types and their corresponding magic numbers.
 			static auto mime_to_magic = []() -> std::vector<std::pair<std::string, std::vector<uint8_t>>> {
@@ -309,6 +316,9 @@ namespace file_mime {
 					{ "image/jpeg", jpg_bytes_1 },
 					{ "image/jpeg", jpg_bytes_2 },
 					{ "image/jpeg", jpg_bytes_3 },
+					{ "image/jpeg", jpg_bytes_4 },
+					{ "image/jpeg", jpg_bytes_5 },
+					{ "image/jpeg", jpg_bytes_6 },
 
 					{ "image/jp2", jpg_2000_bytes },
 
@@ -384,7 +394,7 @@ namespace file_mime {
 		// Since you usually don't know the length of the header/magic number in the passed in file bytes, you have to calculate the hash value incrementally and test it against the map.
 		// The hint can't really be used here efficiently, as the same mime type can have multiple magic numbers meaning that several hash values have to be calculated (again, in the incremental fashion as described above).
 		template<>
-		[[nodiscard]] inline auto get_type_deep<deep_alg_version::DEEP_ALG_V3>(const uint8_t* file_bytes, const size_t file_size, const std::string& mime_type_hint) -> std::string {
+		[[nodiscard]] inline auto get_type_deep<deep_alg_version::DEEP_ALG_V3>(const uint8_t* file_bytes, const size_t file_size, [[maybe_unused]] const std::string& mime_type_hint) -> std::string {
 
 			struct magic_number {
 #if defined(_DEBUG)
@@ -460,6 +470,9 @@ namespace file_mime {
 				{{ jpg_bytes_1.data(), jpg_bytes_1.size() }, "image/jpeg"},
 				{{ jpg_bytes_2.data(), jpg_bytes_2.size() }, "image/jpeg"},
 				{{ jpg_bytes_3.data(), jpg_bytes_3.size() }, "image/jpeg"},
+				{{ jpg_bytes_4.data(), jpg_bytes_4.size() }, "image/jpeg"},
+				{{ jpg_bytes_5.data(), jpg_bytes_5.size() }, "image/jpeg"},
+				{{ jpg_bytes_6.data(), jpg_bytes_6.size() }, "image/jpeg"},
 
 				{{ jpg_2000_bytes.data(), jpg_2000_bytes.size() }, "image/jp2"},
 
